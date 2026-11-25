@@ -62,3 +62,12 @@ the importing user lacks `unfiltered_html`, run the decoded content through
 the plugin's existing editor sanitiser and reject the import if it fails.
 Alternatively, sanitise at render time based on the document author's
 capabilities rather than only on a configuration constant.
+
+## Notes
+
+- This vector is an incomplete fix of CVE-2026-113471, shipped in 4.8.5 and
+  extended in 4.8.6: the editor-save and revision-revert paths were
+  sanitised, the slider import path was not. No public CVE or WPScan record
+  covered the import path at disclosure time.
+- The vendor was contacted by email on 23 Nov 2026; a lab re-test of any fix
+  was offered.

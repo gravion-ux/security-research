@@ -1,9 +1,11 @@
 # Contributing to security-research
 
-Thanks for your interest in contributing! security-research — full-stack team task manager (MERN): JWT auth, role-based access, projects, kanban boards with drag-and-drop, tasks, comments.
+Thanks for your interest in contributing! `security-research` holds sanitised
+advisories for vulnerabilities found in local-lab testing and disclosed to the
+affected vendor first.
 
-This document explains how to set up the project locally, run its tests, and
-submit changes that can be reviewed and merged quickly.
+This document explains how to propose a change and what is expected of an
+advisory before it is merged.
 
 ## Getting started
 
@@ -14,51 +16,63 @@ submit changes that can be reviewed and merged quickly.
    cd security-research
    ```
 
-2. Set up the project:
-
-This project has separate `server/` and `client/` packages. Install both:
-
-```bash
-npm --prefix server install
-npm --prefix client install
-```
-
-3. Create a branch for your change:
+2. Create a branch for your change:
 
    ```bash
    git checkout -b my-change
    ```
 
-## Running the tests
-
-Run the full test suite before opening a pull request:
+There is no application to install and no test framework to set up — the
+repository is Markdown. What you do run is the validator:
 
 ```bash
-cd server && npm test && cd ../client && npm test
+python scripts/validate_advisories.py
 ```
 
-All tests must pass. If your change adds behaviour, add or update tests for it.
+CI runs the same script on every push and pull request, so a green local run
+means the CI check will be green too.
+
+## What an advisory must contain
+
+Every advisory is a Markdown file at the repository root, named
+`<product>-<version>-<vulnerability>.md`. The validator checks that it has:
+
+- a title line naming the product and the affected versions;
+- a summary table with **Product**, **Affected versions**, **Vulnerability**,
+  **Severity** and **Disclosed** rows;
+- the sections **Summary**, **Impact**, **Reproduction**, **Remediation** and
+  **Notes**;
+- no leftover drafting markers.
+
+## Ground rules
+
+- **Local lab only.** A finding is reproduced on a local install with test
+  accounts. Testing a third-party site without authorisation is not
+  contribution, it is an incident.
+- **Vendor first.** The vendor receives the full report — code location,
+  impact, reproduction and remediation — before anything is published here.
+- **Sanitised write-ups.** No weaponised payloads, no lab credentials, no
+  live hostnames. The summary is what makes a finding readable; the exploit
+  is not part of the write-up.
+- **Dedupe first.** Check the vector against the CVE records, WPScan and the
+  vendor's own changelog before treating it as new, and say in **Notes** what
+  you checked against.
+- **One finding per file.** Two products, two files.
+- **No secrets.** Never commit API keys, tokens, passwords or personal data.
+- **Match the existing style.** Follow the structure of the advisories already
+  here; they are the template.
 
 ## Pull request rules
 
-- **One change per PR.** Keep each pull request focused on a single fix,
-  feature, or improvement — small PRs get reviewed faster.
-- **Tests must pass.** Run the test suite locally and make sure it is green
-  before requesting review; CI must pass on the final commit.
-- **No secrets.** Never commit API keys, tokens, passwords, private keys, or
-  personal data — in code, tests, fixtures, or examples. Use clearly fake
-  placeholder values instead.
-- **Match the existing style.** Follow the naming, formatting, and structure
-  already used in the codebase; don't reformat unrelated code.
-- **Describe your change.** In the PR description, say what changed, why, and
-  how you tested it.
-- **Licence.** By contributing, you agree that your contribution is provided
-  under the repository's existing licence.
+- **One change per PR.** Keep each pull request focused.
+- **The validator must pass.** Run `python scripts/validate_advisories.py`
+  before requesting review; CI must be green on the final commit.
+- **Describe your change.** Say what changed, why, and how you tested it.
 
 ## Reporting bugs and requesting features
 
 Use the GitHub issue templates (Bug report / Feature request) so reports
-include the information needed to reproduce and evaluate them.
+include the information needed to evaluate them.
 
 ## Reporting security vulnerabilities
 
@@ -69,3 +83,8 @@ the private reporting process in [SECURITY.md](SECURITY.md) instead.
 
 Participation in this project is governed by the
 [Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Licence
+
+By contributing, you agree that your contribution is provided under the
+repository's existing licence.
