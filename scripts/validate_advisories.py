@@ -20,7 +20,8 @@ Run it directly:
     python scripts/validate_advisories.py
 
 It exits 0 when every check passes and 1 otherwise, printing one line per
-problem.
+problem.  The same checks are exercised as pytest cases in
+tests/test_advisories.py.
 """
 import pathlib
 import re
@@ -60,14 +61,15 @@ MARKERS = ["TO" + "DO", "FIX" + "ME", "TB" + "D", "XX" + "X", "PLACE" + "HOLDER"
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 
 
-def advisory_files():
+def advisory_files(root=ROOT):
     return sorted(
-        path for path in ROOT.glob("*.md")
+        path for path in root.glob("*.md")
         if path.name not in NON_ADVISORY and not path.name.startswith(".")
     )
 
 
 def check_advisory(path):
+    """The structural problems of one advisory document."""
     problems = []
     text = path.read_text(encoding="utf-8")
 
@@ -90,9 +92,10 @@ def check_advisory(path):
     return problems
 
 
-def check_readme(advisories):
+def check_readme(advisories, root=ROOT):
+    """The link problems between the README and the advisories."""
     problems = []
-    readme = ROOT / "README.md"
+    readme = root / "README.md"
     if not readme.exists():
         return ["README.md is missing"]
     text = readme.read_text(encoding="utf-8")
@@ -103,7 +106,7 @@ def check_readme(advisories):
         if not target or "://" in target or target.startswith("mailto:"):
             continue
         linked.add(target)
-        if not (ROOT / target).exists():
+        if not (root / target).exists():
             problems.append("README.md links to %s, which does not exist" % target)
 
     for advisory in advisories:
@@ -117,7 +120,7 @@ def check_readme(advisories):
     return problems
 
 
-def blob_bytes(path):
+def blob_bytes(path, root=ROOT):
     """The bytes git would store for this path, or the working-tree bytes.
 
     A working tree on Windows with `core.autocrlf=true` holds CRLF while the
@@ -125,10 +128,10 @@ def blob_bytes(path):
     file that is published correctly.  The indexed blob is what is published,
     so that is what is checked.
     """
-    relative = path.relative_to(ROOT).as_posix()
+    relative = path.relative_to(root).as_posix()
     try:
         proc = subprocess.run(
-            ["git", "-C", str(ROOT), "show", ":" + relative],
+            ["git", "-C", str(root), "show", ":" + relative],
             capture_output=True, timeout=60)
     except (OSError, subprocess.SubprocessError):
         return path.read_bytes()
@@ -137,9 +140,10 @@ def blob_bytes(path):
     return path.read_bytes()
 
 
-def check_encoding():
+def check_encoding(root=ROOT):
+    """The encoding and line-ending problems of the tracked text files."""
     problems = []
-    for path in sorted(ROOT.rglob("*")):
+    for path in sorted(root.rglob("*")):
         if not path.is_file():
             continue
         parts = set(path.parts)
@@ -147,29 +151,34 @@ def check_encoding():
             continue
         if path.suffix not in (".md", ".py", ".yml", ".yaml", ".txt"):
             continue
-        raw = blob_bytes(path)
+        raw = blob_bytes(path, root)
         if b"\r\n" in raw:
-            problems.append("%s: contains CRLF line endings" % path.relative_to(ROOT))
+            problems.append("%s: contains CRLF line endings" % path.relative_to(root))
         if raw and not raw.endswith(b"\n"):
-            problems.append("%s: does not end with a newline" % path.relative_to(ROOT))
+            problems.append("%s: does not end with a newline" % path.relative_to(root))
         try:
             raw.decode("utf-8")
         except UnicodeDecodeError:
-            problems.append("%s: is not valid UTF-8" % path.relative_to(ROOT))
+            problems.append("%s: is not valid UTF-8" % path.relative_to(root))
     return problems
 
 
-def main():
-    advisories = advisory_files()
-    if not advisories:
-        print("FAIL: no advisory documents found")
-        return 1
-
+def all_problems(root=ROOT):
+    advisories = advisory_files(root)
     problems = []
     for advisory in advisories:
         problems.extend(check_advisory(advisory))
-    problems.extend(check_readme(advisories))
-    problems.extend(check_encoding())
+    problems.extend(check_readme(advisories, root))
+    problems.extend(check_encoding(root))
+    return advisories, problems
+
+
+def main():
+    advisories, problems = all_problems()
+
+    if not advisories:
+        print("FAIL: no advisory documents found")
+        return 1
 
     if problems:
         print("FAIL: %d problem(s)" % len(problems))
