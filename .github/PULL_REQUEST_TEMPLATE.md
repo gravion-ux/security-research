@@ -1,36 +1,25 @@
-## What changed
+## What this changes
 
 <!-- One or two sentences. What is different after this pull request? -->
 
 ## Why
 
-<!-- The problem this solves. For a new advisory: the finding, the product and
-     the version. For a correction: the claim that was wrong. -->
+<!-- Link the issue it closes, or state the problem it solves. -->
 
-## How it was tested
+## Safety boundary
 
-<!-- The exact command you ran and what it printed, e.g.
-     `python scripts/validate_advisories.py` followed by the validator's
-     summary line. -->
+<!-- If this adds or widens a capability, say what it still cannot do:
+     which input it accepts, what it is scoped to, what it refuses.
+     A capability with no stated boundary is not ready to merge. -->
 
-## Disclosure status
+## How it was verified
 
-<!-- For a new advisory: when the vendor was told and how. If the vendor has
-     not been contacted yet, say so -- a public write-up before disclosure is
-     not acceptable, and the pull request should stay a draft. -->
-
-## Sanitisation
-
-<!-- Confirm the diff carries no weaponised payload, no credential, no live
-     hostname, and no lab detail that identifies a test target. -->
+<!-- The exact command you ran, and what it printed. The test count must
+     go up, not down. -->
 
 ## Checklist
 
-- [ ] `python scripts/validate_advisories.py` passes locally and CI is green
-- [ ] The advisory has a Summary table with Product, Affected versions, Vulnerability, Severity and Disclosed
-- [ ] The advisory has the Summary, Impact, Reproduction, Remediation and Notes sections
-- [ ] The vendor was told before publication
-- [ ] The finding was reproduced on a local lab; no third-party site was tested
-- [ ] No weaponised payload, credential, or live target anywhere in the diff
-- [ ] The README advisory table lists the new advisory, with a working link
-- [ ] One logical change in this PR
+- [ ] - [ ] `python -m pytest . -q` passes locally
+- [ ] No credential, token, or real endpoint appears anywhere in the diff
+- [ ] New behaviour has a test, including the case it refuses
+- [ ] Public docs (`README.md`) match the code
