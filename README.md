@@ -1,10 +1,8 @@
+<p align="center"><img src="assets/banner.svg" alt="security-research banner" width="100%"/></p>
+
 # Security Research — Priyanshu Kumar Thakur (GRAVION)
 
-Write-ups of vulnerabilities I found, verified in a local lab, and disclosed
-responsibly to the affected vendor. Nothing here was tested against a
-production site: every finding was reproduced against a local WordPress
-install, reported to the vendor first, and published here only in sanitised
-advisory form.
+**Write-ups of vulnerabilities I found, verified in a local lab, and disclosed responsibly to the affected vendor.**
 
 **Researcher:** Priyanshu Kumar Thakur · [github.com/gravion-ux](https://github.com/gravion-ux) · [Portfolio](https://gravion-ux.github.io/portfolio/)
 
